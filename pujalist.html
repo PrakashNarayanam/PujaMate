@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PujaMate</title>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .scrollable-select {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        /* Custom styles to refine the Bootstrap theme */
+        body {
+            font-family: 'Noto Sans Telugu', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .card {
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-header {
+            background-color: transparent;
+            border-bottom: 0;
+            text-align: center;
+            padding-bottom: 0;
+        }
+        
+        .card-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #4338ca;
+        }
+
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #4338ca;
+            box-shadow: 0 0 0 0.25rem rgba(67, 56, 202, 0.25);
+        }
+        
+        .list-group-item {
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            background-color: #f9fafb;
+        }
+        #samagriList {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .btn-primary {
+            background-color: #4338ca;
+            border-color: #4338ca;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3730a3;
+            border-color: #3730a3;
+        }
+        
+        .btn-success {
+            background-color: #10b981;
+            border-color: #10b981;
+        }
+        
+        .btn-success:hover {
+            background-color: #059669;
+            border-color: #059669;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            border-color: #6b7280;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4b5563;
+            border-color: #4b5563;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container my-5" style="max-width: 600px;">
+    <div class="card p-4" id="mainPanel">
+        <div class="mb-3">
+            <a href="index.html" class="btn btn-outline-primary">🏠 హోమ్‌</a>
+        </div>
+        <div class="card-header">
+            <h1 class="card-title">🪔 పూజా సామగ్రి జాబితా</h1>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="pujaSelect" class="form-label fw-bold text-muted">పూజా రకం ఎంచుకోండి:</label>
+                <select class="form-select" id="pujaSelect"></select>
+            </div>
+
+            <ul class="list-group" id="samagriList"></ul>
+
+            <div class="d-grid gap-2 d-md-block mt-4">
+                <div class="row g-2">
+                    <div class="col-12 col-md">
+                        <button class="btn btn-primary w-100" onclick="copyList()">📋 కాపీ</button>
+                    </div>
+                    <div class="col-12 col-md">
+                        <button class="btn btn-secondary w-100" onclick="shareList()">📤 షేర్</button>
+                    </div>
+                    <div class="col-12 col-md">
+                        <button class="btn btn-primary w-100" onclick="editMode()">✏ ఎడిట్</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mt-4" id="editPanel" style="display:none;">
+        <div class="card-header">
+            <h2 class="card-title">✏ పూజా వివరాలు ఎడిట్ చేయండి</h2>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="editPujaName" class="form-label fw-bold text-muted">పూజా పేరు:</label>
+                <input type="text" class="form-control" id="editPujaName" placeholder="కొత్త పూజా పేరు">
+            </div>
+
+            <div class="mb-3">
+                <label for="editItem" class="form-label fw-bold text-muted">కొత్త సామగ్రి చేర్చు:</label>
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" id="editItem" placeholder="సామగ్రి పేరు">
+                    <input type="number" class="form-control" id="editQuantity" placeholder="సంఖ్య" style="max-width: 80px;" value="1">
+                    <select class="form-select" id="editUnit" style="max-width: 100px;">
+                        <option value="none">none</option>
+                        <option value="సంఖ్య">సంఖ్య</option>
+                        <option value="కిలో">కిలో</option>
+                        <option value="గ్రాము">గ్రాము</option>
+                        <option value="మీటర్">మీటర్</option>
+                        <option value="డజను">డజను</option>
+                        <option value="లీటర్">లీటర్</option>
+                        <option value="జత">జత</option>
+                        <option value="ప్యాకెట్">ప్యాకెట్</option>
+                        <option value="డబ్బా">డబ్బా</option>
+                    </select>
+                    <button class="btn btn-primary" type="button" onclick="addItem()">+</button>
+                </div>
+                <div class="mt-2">
+                    <label for="bulkItems" class="form-label text-muted">ఒకేసారి అనేక సామగ్రి చేర్చండి (ప్రతి లైన్ ఒక సామగ్రి):</label>
+                    <textarea class="form-control" id="bulkItems" rows="2" placeholder="ఉదా: కొబ్బరికాయ\nపసుపు\nకుంకుమ"></textarea>
+                    <button class="btn btn-success mt-2" type="button" onclick="addBulkItems()">బల్క్ చేర్చు</button>
+                </div>
+            </div>
+
+            <label class="form-label fw-bold text-muted">ప్రస్తుత సామగ్రి:</label>
+            <ul class="list-group mb-3" id="editList"></ul>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                <button class="btn btn-danger me-md-auto" id="deleteButton" onclick="deletePuja()">పూజా తొలగించండి</button>
+                <button class="btn btn-secondary" onclick="cancelEdit()">రద్దు చేయి</button>
+                <button class="btn btn-success" onclick="saveChanges()">💾 సేవ్</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function addBulkItems() {
+    let puja = document.getElementById("editPujaName").value;
+    let bulkText = document.getElementById("bulkItems").value.trim();
+    if (!bulkText) return;
+    if (!pujaData[puja]) pujaData[puja] = [];
+    let lines = bulkText.split(/\r?\n/);
+    lines.forEach(line => {
+        let itemName = line.trim();
+        if (!itemName) return;
+        let translatedItem = englishToTeluguMap[itemName] || transliterationMap[itemName] || itemName;
+        pujaData[puja].push({ name: translatedItem, quantity: 1, unit: 'none' });
+    });
+    document.getElementById("bulkItems").value = "";
+    renderEditList();
+}
+let pujaData = {};
+let originalPujaData = {};
+
+// Fetch data from puja.json and initialize dropdown
+async function fetchAndInitPujaData() {
+    try {
+        const response = await fetch('puja.json');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        pujaData = await response.json();
+        populatePujaSelect();
+    } catch (e) {
+        console.error('Error fetching puja.json:', e);
+        document.getElementById('pujaSelect').innerHTML = '<option>డేటా లోపం</option>';
+    }
+}
+
+// Helper function to transliterate from English
+const englishToTeluguMap = {
+    "coconut": "కొబ్బరికాయ", "jaggery": "బెల్లం", "banana": "అరటిపండు", "turmeric": "పసుపు", "kumkum": "కుంకుమ",
+    "milk": "పాలు", "sugarcane": "చెరకు", "clothes": "కొత్త దుస్తులు", "lamp": "దీపం", "incense": "సుగంధ ద్రవ్యాలు",
+    "flowers": "పూలు", "betel leaves": "తమలపాకులు", "betel nut": "వక్కలు", "rice": "బియ్యం", "ghee": "నెయ్యి",
+    "camphor": "కర్పూరం", "agarbatti": "అగరబత్తి", "matches": "అగ్గిపెట్టె", "cotton": "పత్తి", "oil": "నూనె",
+    "water": "నీరు", "sandalwood": "గంధం", "chandan": "చందనం", "akshata": "అక్షతలు", "coins": "నాణెములు",
+    "kalasha": "కలశం", "mango leaves": "మామిడి ఆకులు", "sugar": "పంచదార", "honey": "తేనె", "dhoop": "ధూపం",
+    "bhajanam": "భజనపాత్ర", "bell": "గంట", "plate": "పళ్ళెం", "spoon": "చెంచా", "gram": "గ్రాము", "packet": "ప్యాకెట్", "dabba": "డబ్బా"
+};
+
+const transliterationMap = {
+    "kobbari": "కొబ్బరికాయ", "bellam": "బెల్లం", "aratipandu": "అరటిపండు", "pasupu": "పసుపు", "kumkuma": "కుంకుమ",
+    "palu": "పాలు", "cheruku": "చెరకు", "kottadusthulu": "కొత్త దుస్తులు", "deepam": "దీపం", "sugandhadravyalu": "సుగంధ ద్రవ్యాలు",
+    "poolu": "పూలు", "tamalapaakulu": "తమలపాకులు", "vakkalu": "వక్కలు", "biyyam": "బియ్యం", "neyyi": "నెయ్యి",
+    "karpooram": "కర్పూరం", "agarbatti": "అగరబత్తి", "aggipette": "అగ్గిపెట్టె", "patti": "పత్తి", "noone": "నూనె",
+    "neeru": "నీరు", "gandham": "గంధం", "chandanam": "చందనం", "akshatalu": "అక్షతలు", "naanemulu": "నాణెములు",
+    "kalasham": "కలశం", "mamidi": "మామిడి ఆకులు", "panchadara": "పంచదార", "thene": "తేనె", "dhoopam": "ధూపం",
+    "bhajanapatra": "భజనపాత్ర", "ganta": "గంట", "pallem": "పళ్ళెం", "chencha": "చెంచా", "gramu": "గ్రాము", "packet": "ప్యాకెట్", "dabba": "డబ్బా"
+};
+
+function populatePujaSelect() {
+    let select = document.getElementById("pujaSelect");
+    select.innerHTML = "";
+    const pujaKeys = Object.keys(pujaData);
+    pujaKeys.forEach(puja => {
+        let option = document.createElement("option");
+        option.value = puja;
+        option.textContent = puja;
+        select.appendChild(option);
+    });
+    let newPujaOption = document.createElement("option");
+    newPujaOption.value = "new-puja";
+    newPujaOption.textContent = "కొత్త పూజా రకం చేర్చు";
+    select.appendChild(newPujaOption);
+    // Toggle scrollable class if more than 6 puja types
+    if (pujaKeys.length > 6) {
+        select.classList.add('scrollable-select');
+    } else {
+        select.classList.remove('scrollable-select');
+    }
+    showSamagri();
+}
+
+function showSamagri() {
+    let puja = document.getElementById("pujaSelect").value;
+    if (puja === "new-puja") {
+        editMode(true);
+        return;
+    }
+    let list = document.getElementById("samagriList");
+    list.innerHTML = "";
+    (pujaData[puja] || []).forEach(item => {
+        let li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        let displayUnit = item.unit === 'none' ? '' : `${item.quantity} ${item.unit}`;
+        li.innerHTML = `
+            <span>${item.name}</span>
+            <span class="badge bg-primary rounded-pill">${displayUnit}</span>
+        `;
+        list.appendChild(li);
+    });
+}
+
+function copyList() {
+    let puja = document.getElementById("pujaSelect").value;
+    let text = `${puja}:\n`;
+    (pujaData[puja] || []).forEach(item => {
+        let displayUnit = item.unit === 'none' ? '' : ` - ${item.quantity} ${item.unit}`;
+        text += `${item.name}${displayUnit}\n`;
+    });
+    // navigator.clipboard.writeText(text);
+    // Use execCommand for better cross-browser support, especially in iframes
+    const tempInput = document.createElement('textarea');
+    tempInput.value = text;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+
+    alert("కాపీ అయ్యింది!");
+}
+
+function shareList() {
+    let puja = document.getElementById("pujaSelect").value;
+    let text = `${puja}:\n`;
+    (pujaData[puja] || []).forEach(item => {
+        let displayUnit = item.unit === 'none' ? '' : ` - ${item.quantity} ${item.unit}`;
+        text += `${item.name}${displayUnit}\n`;
+    });
+    if (navigator.share) {
+        navigator.share({ text: text, title: 'పూజా సామగ్రి జాబితా' });
+    } else {
+        alert("మీ బ్రౌజర్ షేర్ సపోర్ట్ చేయదు.");
+    }
+}
+
+function editMode(isNew = false) {
+    // Create a deep copy of the current data in case the user cancels
+    originalPujaData = JSON.parse(JSON.stringify(pujaData));
+
+    document.getElementById("mainPanel").style.display = "none";
+    document.getElementById("editPanel").style.display = "block";
+    
+    if (isNew) {
+        document.getElementById("editPujaName").value = "";
+        document.getElementById("deleteButton").style.display = "none";
+        document.getElementById("editPujaName").placeholder = "కొత్త పూజా పేరు";
+        document.getElementById("editPujaName").disabled = false;
+        document.getElementById("editItem").value = "";
+        document.getElementById("editQuantity").value = 1;
+        document.getElementById("editList").innerHTML = "";
+    } else {
+        document.getElementById("editPujaName").value = document.getElementById("pujaSelect").value;
+        document.getElementById("deleteButton").style.display = "block";
+        document.getElementById("editPujaName").disabled = false;
+        renderEditList();
+    }
+}
+
+function cancelEdit() {
+    // Restore the pujaData from the backup
+    pujaData = originalPujaData;
+    sessionStorage.setItem("pujaData", JSON.stringify(pujaData));
+
+    // Switch back to the main view
+    document.getElementById("editPanel").style.display = "none";
+    document.getElementById("mainPanel").style.display = "block";
+    populatePujaSelect();
+}
+
+function renderEditList() {
+    let puja = document.getElementById("editPujaName").value;
+    let listDiv = document.getElementById("editList");
+    listDiv.innerHTML = "";
+    (pujaData[puja] || []).forEach((item, idx) => {
+        let li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.innerHTML = `
+            <span>${item.name}</span>
+            <div class="d-flex align-items-center">
+                <input type="number" class="form-control me-2" style="width: 80px;" value="${item.quantity}" data-index="${idx}" data-field="quantity">
+                <select class="form-select me-2" style="width: 100px;" data-index="${idx}" data-field="unit">
+                    <option value="none" ${item.unit === 'none' ? 'selected' : ''}>none</option>
+                    <option value="సంఖ్య" ${item.unit === 'సంఖ్య' ? 'selected' : ''}>సంఖ్య</option>
+                    <option value="కిలో" ${item.unit === 'కిలో' ? 'selected' : ''}>కిలో</option>
+                    <option value="గ్రాము" ${item.unit === 'గ్రాము' ? 'selected' : ''}>గ్రాము</option>
+                    <option value="మీటర్" ${item.unit === 'మీటర్' ? 'selected' : ''}>మీటర్</option>
+                    <option value="డజను" ${item.unit === 'డజను' ? 'selected' : ''}>డజను</option>
+                    <option value="లీటర్" ${item.unit === 'లీటర్' ? 'selected' : ''}>లీటర్</option>
+                    <option value="జత" ${item.unit === 'జత' ? 'selected' : ''}>జత</option>
+                    <option value="ప్యాకెట్" ${item.unit === 'ప్యాకెట్' ? 'selected' : ''}>ప్యాకెట్</option>
+                    <option value="డబ్బా" ${item.unit === 'డబ్బా' ? 'selected' : ''}>డబ్బా</option>
+                </select>
+                <button class="btn btn-link text-danger" onclick="removeItem(${idx})">❌</button>
+            </div>
+        `;
+        listDiv.appendChild(li);
+    });
+}
+
+function addItem() {
+    let puja = document.getElementById("editPujaName").value;
+    let itemInput = document.getElementById("editItem").value.trim().toLowerCase();
+    let quantityInput = document.getElementById("editQuantity").value;
+    let unitInput = document.getElementById("editUnit").value;
+    
+    if (!pujaData[puja]) {
+        pujaData[puja] = [];
+    }
+
+    if (itemInput) {
+        let translatedItem = englishToTeluguMap[itemInput];
+        
+        if (!translatedItem) {
+            translatedItem = transliterationMap[itemInput];
+        }
+
+        if (!translatedItem) {
+            translatedItem = itemInput;
+        }
+
+        const newItem = {
+            name: translatedItem,
+            quantity: parseInt(quantityInput) || 1,
+            unit: unitInput
+        };
+
+        pujaData[puja].push(newItem);
+        document.getElementById("editItem").value = "";
+        document.getElementById("editQuantity").value = 1;
+        renderEditList();
+    }
+}
+
+function removeItem(index) {
+    let puja = document.getElementById("editPujaName").value;
+    if (pujaData[puja]) {
+        pujaData[puja].splice(index, 1);
+        renderEditList();
+    }
+}
+
+function deletePuja() {
+    let puja = document.getElementById("editPujaName").value;
+    if (confirm(`మీరు ${puja} ను తొలగించాలనుకుంటున్నారా?`)) {
+        delete pujaData[puja];
+        saveChanges();
+    }
+}
+
+function saveChanges() {
+    let pujaName = document.getElementById("editPujaName").value.trim();
+    if (pujaName === "") {
+        alert("దయచేసి పూజా రకం పేరు ఇవ్వండి.");
+        return;
+    }
+
+    let oldPujaName = document.getElementById("pujaSelect").value;
+    let newItems = [];
+    let listItems = document.getElementById("editList").querySelectorAll('.list-group-item');
+
+    listItems.forEach(itemEl => {
+        let name = itemEl.querySelector('span').textContent;
+        let quantity = parseInt(itemEl.querySelector('input').value) || 1;
+        let unit = itemEl.querySelector('select').value;
+        newItems.push({ name: name, quantity: quantity, unit: unit });
+    });
+
+    if (oldPujaName !== "new-puja" && oldPujaName !== pujaName) {
+        delete pujaData[oldPujaName];
+    }
+    
+    pujaData[pujaName] = newItems;
+
+    sessionStorage.setItem("pujaData", JSON.stringify(pujaData));
+    document.getElementById("editPanel").style.display = "none";
+    document.getElementById("mainPanel").style.display = "block";
+    populatePujaSelect();
+}
+
+// Initial app load
+fetchAndInitPujaData();
+document.getElementById("pujaSelect").addEventListener("change", showSamagri);
+</script>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                })
+                .catch(err => {
+                    console.log('Service Worker registration failed:', err);
+                });
+        });
+    }
+</script>
+</body>
+</html>

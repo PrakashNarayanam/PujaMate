@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>అష్టోత్తరాలు</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .god-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px 14px;
+            justify-content: center;
+        }
+        .god-tag {
+            background: linear-gradient(135deg, #f7b42c 0%, #fc575e 100%);
+            color: #fff;
+            font-size: 1.25rem;
+            font-family: 'Noto Sans Telugu', sans-serif;
+            font-weight: 700;
+            border: none;
+            border-radius: 22px;
+            padding: 14px 36px;
+            margin: 0;
+            margin-bottom: 0;
+            box-shadow: 0 4px 16px rgba(252,87,94,0.10), 0 1.5px 4px rgba(0,0,0,0.06);
+            cursor: pointer;
+            transition: box-shadow 0.2s, transform 0.1s, background 0.2s;
+            min-width: 120px;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        .god-tag:hover {
+            background: linear-gradient(135deg, #fc575e 0%, #f7b42c 100%);
+            box-shadow: 0 6px 20px rgba(252,87,94,0.18), 0 2px 8px rgba(0,0,0,0.10);
+            transform: scale(1.06);
+        }
+        body {
+            background: #fff6e9;
+        }
+        h2.text-center {
+            color: #fc575e;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .god-grid {
+                gap: 10px 6px;
+            }
+            .god-tag {
+                font-size: 1.05rem;
+                padding: 10px 10px;
+                min-width: 90px;
+            }
+            h2.text-center {
+                font-size: 1.1rem;
+                padding: 8px 0;
+            }
+            .container {
+                padding: 0 2vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">దేవుళ్ళ జాబితా</h2>
+        <div id="godList" class="god-grid"></div>
+    <div id="navagrahaList" class="god-grid" style="display:none;"></div>
+    </div>
+
+    <script>
+        fetch('ashtothara.json')
+            .then(res => res.json())
+            .then(data => {
+                let list = document.getElementById('godList');
+                let navagrahaList = document.getElementById('navagrahaList');
+                // Remove navagrahalu if already present in data
+                const godNames = Object.keys(data).filter(name => name !== 'నవగ్రహాలు');
+                godNames.forEach(godName => {
+                    let tag = document.createElement('div');
+                    tag.className = "god-tag";
+                    tag.textContent = godName;
+                    tag.onclick = () => {
+                        localStorage.setItem("selectedGod", JSON.stringify({ name: godName, ashtothara: data[godName] }));
+                        window.location.href = "god.html";
+                    };
+                    list.appendChild(tag);
+                });
+
+                // Add Navagrahalu tag at the end
+                let navagrahaTag = document.createElement('div');
+                navagrahaTag.className = "god-tag";
+                navagrahaTag.textContent = 'నవగ్రహాలు';
+                navagrahaTag.onclick = () => {
+                    list.style.display = 'none';
+                    navagrahaList.style.display = 'flex';
+                    navagrahaList.innerHTML = '';
+                    // 9 graha names
+                    const grahas = [
+                        'సూర్యుడు', 'చంద్రుడు', 'అంగారకుడు / కుజుడు', 'బుధుడు', 'గురు', 'శుక్రుడు', 'శని', 'రాహు', 'కేతు', 'మృత్యుంజయ'
+                    ];
+                    grahas.forEach(graha => {
+                        let gtag = document.createElement('div');
+                        gtag.className = 'god-tag';
+                        gtag.textContent = graha;
+                        gtag.onclick = () => {
+                      
+                            let ashtothara = (data['నవగ్రహాలు'] && data['నవగ్రహాలు'][graha]) ? data['నవగ్రహాలు'][graha] : [];
+                            localStorage.setItem("selectedGod", JSON.stringify({ name: graha, ashtothara }));
+                            window.location.href = "god.html";
+                        };
+                        navagrahaList.appendChild(gtag);
+                    });
+                };
+                list.appendChild(navagrahaTag);
+            });
+    </script>
+</body>
+</html>

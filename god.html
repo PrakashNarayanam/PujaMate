@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>అష్టోత్తరం</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 id="godName" class="text-center mb-3"></h2>
+        <ol id="godAshtothara"></ol>
+    </div>
+
+    <script>
+        let god = JSON.parse(localStorage.getItem("selectedGod"));
+        if (god) {
+            document.getElementById('godName').textContent = god.name;
+            god.ashtothara.forEach(line => {
+                let li = document.createElement('li');
+                li.textContent = line;
+                document.getElementById('godAshtothara').appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
